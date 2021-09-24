@@ -15,24 +15,29 @@ public class TodoUtil {
 	
 	public static void createItem(TodoList list) {
 		
-		String title, desc;
+		String category, title, desc, due_date;
 		Scanner sc = new Scanner(System.in);
 		
 		System.out.printf("\n"
 				+ "--------일정 추가하기--------\n"
-				+ "제목 입력 > ");
+				+ "카테고리 입력 > ");
+		category = sc.next();
 		
-		title = sc.next();
+		System.out.printf("제목 입력 > ");
+		title = sc.nextLine();
+		
 		if (list.isDuplicate(title)) {
 			System.out.printf("[오류]이미 제목의 일정이 존재합니다!!");
 			return;
 		}
-		sc.nextLine();
 		
 		System.out.printf("설명 입력 > ");
 		desc = sc.nextLine();
 		
-		TodoItem t = new TodoItem(title, desc);
+		System.out.printf("마감일자 입력(yyyy/mm/dd) > ");
+		due_date = sc.nextLine();
+		
+		TodoItem t = new TodoItem(category, title, desc, due_date);
 		list.addItem(t);
 	}
 
@@ -40,18 +45,11 @@ public class TodoUtil {
 		
 		Scanner sc = new Scanner(System.in);
 		
-		System.out.printf("\n"
-				+ "-------일정 삭제하기-------\n"
-				+ "삭제할 일정 제목 > ");
-		String title = sc.nextLine();
+		System.out.printf("[항목 삭제]\n"
+				+ "삭제할 항목의 번호를 입력하시오 > ");
+		int number = sc.nextInt();
 
-		
-		for (TodoItem item : l.getList()) {
-			if (title.equals(item.getTitle())) {
-				l.deleteItem(item);
-				break;
-			}
-		}
+		l.deleteItem(l.getList().get(number-1));
 	}
 
 
@@ -61,15 +59,19 @@ public class TodoUtil {
 		
 		System.out.printf("\n"
 				+ "-------일정 수정-------\n"
-				+ "수정하고 싶은 일정 이름 > ");
-		String title = sc.next().trim();
-		if (!l.isDuplicate(title)) {
-			System.out.println("[오류]해당 일정과 같은 이름이 없음!");
-			return;
-		}
-
+				+ "수정할 항목의 번호를 입력하시오 > ");
+		int number = sc.nextInt();
+		TodoItem element = l.getList().get(number-1);
+		System.out.printf("\n%d. [%s] %s - %s", number, element.getTitle(), element.getDesc(), element.getCurrent_date());
+		
+		//l.deleteItem(null);
+		
 		System.out.printf("\n새로운 일정 이름 > ");
 		String new_title = sc.next().trim();
+	
+		System.out.printf("\n새로운 카테고리 > ");
+		String new_category = sc.next().trim();
+		
 		if (l.isDuplicate(new_title)) {
 			System.out.println("[오류]일정 이름이 중복되었음!");
 			return;
@@ -77,22 +79,42 @@ public class TodoUtil {
 		
 		sc.nextLine();
 		
-		System.out.printf("\n새로운 설명 입력 > ");
+		System.out.printf("\n새로운 내 > ");
 		String new_description = sc.nextLine().trim();
-		for (TodoItem item : l.getList()) {
-			if (item.getTitle().equals(title)) {
-				l.deleteItem(item);
-				TodoItem t = new TodoItem(new_title, new_description);
-				l.addItem(t);
-				System.out.println("일정 수정 완료!");
-			}
-		}
-
+		
+		System.out.printf("\n새로운 마감일 입력 (yyyy/mm/dd) > ");
+		String new_end_date = sc.nextLine().trim();
+		
+		l.deleteItem(l.getList().get(number-1));
+		TodoItem t = new TodoItem(new_category, new_title, new_description, new_end_date);
+		l.addEditItem(number-1, t);
 	}
 
 	public static void listAll(TodoList l) {
+		int i = 1;
+		System.out.printf("[전체 목록, 총 %d개]", l.getList().size());
 		for (TodoItem item : l.getList()) {
-			System.out.printf("\n[%s] %s - %s", item.getTitle(), item.getDesc(), item.getCurrent_date());
+			System.out.printf("\n%d. [%s] %s - %s - %s - %s",i, item.getCategry(),item.getTitle(), item.getDesc(), item.getEnd_date(), item.getCurrent_date());
+			i++;
+		}
+		System.out.println();
+	}
+	
+	public static void findList(TodoList l, String keyword) {
+		keyword = keyword.trim();
+		ArrayList<String> list = new ArrayList<String>();
+		int i = 1;
+		
+		for(TodoItem item: l.getList()) {
+			if(item.toFindString().contains(keyword)){
+				list.add(i+". " + "[" + item.getCategry() + "] " + item.getTitle() + " - " + item.getDesc() + " - " + item.getEnd_date() + " - " + item.getCurrent_date());
+			}
+			i++;
+		}
+		System.out.printf("[전체 목록, 총 %d개]\n", list.size());
+		
+		for(String item: list) {
+			System.out.println(item);
 		}
 	}
 	
@@ -121,7 +143,7 @@ public class TodoUtil {
 			while((oneline = br.readLine()) != null) {
 				i++;
 				String [] str = oneline.split("##");
-				l.addItem(new TodoItem(str[0], str[1]));
+				l.addItem(new TodoItem(str[0], str[1], str[2], str[3], str[4]));
 			}
 			
 			System.out.printf("\n총 %d개의 일정을 읽어왔습니다!\n", i);
@@ -129,4 +151,7 @@ public class TodoUtil {
 			
 		}catch (IOException e) {
 			
-		}}}
+		}
+		}
+	}
+

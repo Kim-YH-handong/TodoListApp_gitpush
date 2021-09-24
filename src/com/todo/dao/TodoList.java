@@ -17,6 +17,10 @@ public class TodoList {
 	public void addItem(TodoItem t) {
 		list.add(t);
 	}
+	
+	public void addEditItem(int i, TodoItem t){
+		list.add(i, t);
+	}
 
 	public void deleteItem(TodoItem t) {
 		list.remove(t);
@@ -41,7 +45,7 @@ public class TodoList {
 		System.out.println("\n"
 				+ "-------모든 일정-------\n");
 		for (TodoItem myitem : list) {
-			System.out.printf("\n[%s] %s - %s", myitem.getTitle(), myitem.getDesc(), myitem.getCurrent_date());
+			System.out.printf("\n[%s] %s - %s - %s - %s",myitem.getCategry(), myitem.getTitle(), myitem.getDesc(), myitem.getCurrent_date(), myitem.getEnd_date());
 		}
 	}
 	

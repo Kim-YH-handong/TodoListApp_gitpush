@@ -15,10 +15,12 @@ public class TodoMain {
 		TodoUtil.loadList(l, "todolist.txt");
 		boolean isList = false;
 		boolean quit = false;
+		Menu.displaymenu();
 		do {
-			Menu.displaymenu();
+			Menu.prompt();
+			
 			isList = false;
-			String choice = sc.next();
+			String choice = sc.nextLine();
 			switch (choice) {
 
 			case "add":
@@ -61,8 +63,13 @@ public class TodoMain {
 				TodoUtil.saveList(l, "todolist.txt");
 				quit = true;
 				break;
+				
 			default:
-				System.out.println("위에 언급된 명령어를 입력해주세요(help - 도움말)");
+				if(choice.substring(0 ,4).equals("find")) {
+					TodoUtil.findList(l, choice.substring(4, choice.length()));
+				}else {
+					System.out.println("위에 언급된 명령어를 입력해주세요(help - 도움말)");					
+				}
 				break;
 			}
 			
