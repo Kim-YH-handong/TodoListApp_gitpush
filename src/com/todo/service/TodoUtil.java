@@ -21,7 +21,7 @@ public class TodoUtil {
 		System.out.printf("\n"
 				+ "--------일정 추가하기--------\n"
 				+ "카테고리 입력 > ");
-		category = sc.next();
+		category = sc.nextLine();
 		
 		System.out.printf("제목 입력 > ");
 		title = sc.nextLine();

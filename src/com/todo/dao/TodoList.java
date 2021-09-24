@@ -46,6 +46,7 @@ public class TodoList {
 		System.out.printf("[전체 목록, 총 %d개]", list.size());
 		for (TodoItem myitem : list) {
 			System.out.printf("\n%d. [%s] %s - %s - %s - %s",i, myitem.getCategry(),myitem.getTitle(), myitem.getDesc(), myitem.getEnd_date(), myitem.getCurrent_date());
+			i++;
 		}
 	}
 	
