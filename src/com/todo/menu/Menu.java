@@ -11,7 +11,10 @@ public class Menu {
         System.out.println("asc - 제목순 정렬");
         System.out.println("desc - 제목역순 정렬");
         System.out.println("date - 날짜순 정렬");
+        System.out.println("ls_date_desc - 날짜역순 정렬");
         System.out.println("find - find <키워드>");
+        System.out.println("find_cate - find_cate <카테고리이름>");
+        System.out.println("ls_cate - 카테고리 종류");
         System.out.println("exit - 종료");
     }
     

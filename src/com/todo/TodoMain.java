@@ -55,6 +55,16 @@ public class TodoMain {
 				isList = true;
 				break;
 				
+			case "ls_date_desc":
+				l.sortByDate();
+				l.reverseList();
+				isList = true;
+				break;
+				
+			case "ls_cate":
+				TodoUtil.countCategory(l);
+				break;
+				
 			case "help":
 				Menu.displaymenu();
 				break;
@@ -65,9 +75,21 @@ public class TodoMain {
 				break;
 				
 			default:
-				if(choice.substring(0 ,4).equals("find")) {
-					TodoUtil.findList(l, choice.substring(4, choice.length()));
-				}else {
+				if(choice.length() > 3) {
+					if(choice.length()>8) {
+						if(choice.substring(0, 9).equals("find_cate")) {
+							TodoUtil.findCate(l, choice.substring(9, choice.length()));
+							break;
+						}else {
+							System.out.println("위에 언급된 명령어를 입력해주세요(help - 도움말)");
+						}
+					}else if(choice.substring(0 ,4).equals("find")){
+						TodoUtil.findList(l, choice.substring(4, choice.length()));
+						break;
+					}else{
+						System.out.println("위에 언급된 명령어를 입력해주세요(help - 도움말)");
+					}
+				}else{
 					System.out.println("위에 언급된 명령어를 입력해주세요(help - 도움말)");					
 				}
 				break;

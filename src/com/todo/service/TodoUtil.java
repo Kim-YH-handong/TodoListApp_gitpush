@@ -79,7 +79,7 @@ public class TodoUtil {
 		
 		sc.nextLine();
 		
-		System.out.printf("\n새로운 내 > ");
+		System.out.printf("\n새로운 내용 > ");
 		String new_description = sc.nextLine().trim();
 		
 		System.out.printf("\n새로운 마감일 입력 (yyyy/mm/dd) > ");
@@ -116,6 +116,43 @@ public class TodoUtil {
 		for(String item: list) {
 			System.out.println(item);
 		}
+	}
+	
+	public static void findCate(TodoList l, String cateName) {
+		cateName = cateName.trim();
+		ArrayList<String> list = new ArrayList<String>();
+		int i = 1;
+		
+		for(TodoItem item: l.getList()) {
+			if(item.getCategry().contains(cateName)){
+				list.add(i+". " + "[" + item.getCategry() + "] " + item.getTitle() + " - " + item.getDesc() + " - " + item.getEnd_date() + " - " + item.getCurrent_date());
+			}
+			i++;
+		}
+		System.out.printf("[전체 목록, 총 %d개]\n", list.size());
+		
+		for(String item: list) {
+			System.out.println(item);
+		}
+	}
+	
+	public static void countCategory(TodoList l) {
+		Set<String> set = new HashSet<String>();
+		boolean first = true;
+		
+		for(TodoItem item: l.getList()) {
+			set.add(item.getCategry());
+		}
+		
+		for(String item: set) {
+			if(first) {
+				System.out.printf(item);
+				first = false;
+			}else {
+				System.out.printf(" / %s", item);
+			}
+		}
+		System.out.printf("\n총 %d개의 카테고리가 등록되어 있습니다.", set.size());
 	}
 	
 	public static void saveList(TodoList l, String filename) {
