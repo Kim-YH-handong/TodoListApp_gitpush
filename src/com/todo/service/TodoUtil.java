@@ -6,12 +6,18 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
+import java.sql.*;
 
 import com.todo.dao.TodoItem;
 import com.todo.dao.TodoList;
+import com.todo.service.*;
 
 public class TodoUtil {
+	static Connection conn = DbConnect.getConnection();
 	
 	public static void createItem(TodoList list) {
 		
@@ -38,7 +44,8 @@ public class TodoUtil {
 		due_date = sc.nextLine();
 		
 		TodoItem t = new TodoItem(category, title, desc, due_date);
-		list.addItem(t);
+		if(list.addItem(t) > 0)
+			System.out.println("추가되었습니다.");
 	}
 
 	public static void deleteItem(TodoList l) {
@@ -47,9 +54,10 @@ public class TodoUtil {
 		
 		System.out.printf("[항목 삭제]\n"
 				+ "삭제할 항목의 번호를 입력하시오 > ");
-		int number = sc.nextInt();
+		int index = sc.nextInt();
 
-		l.deleteItem(l.getList().get(number-1));
+		if(l.deleteItem(index)>0) 
+			System.out.println("삭제되었습니다.");
 	}
 
 
@@ -60,46 +68,45 @@ public class TodoUtil {
 		System.out.printf("\n"
 				+ "-------일정 수정-------\n"
 				+ "수정할 항목의 번호를 입력하시오 > ");
-		int number = sc.nextInt();
-		TodoItem element = l.getList().get(number-1);
-		System.out.printf("\n%d. [%s] %s - %s", number, element.getTitle(), element.getDesc(), element.getCurrent_date());
-		
-		//l.deleteItem(null);
-		
+		int index = sc.nextInt();
+			
 		System.out.printf("\n새로운 일정 이름 > ");
 		String new_title = sc.next().trim();
-	
 		System.out.printf("\n새로운 카테고리 > ");
 		String new_category = sc.next().trim();
-		
-		if (l.isDuplicate(new_title)) {
-			System.out.println("[오류]일정 이름이 중복되었음!");
-			return;
-		}
-		
 		sc.nextLine();
-		
 		System.out.printf("\n새로운 내용 > ");
 		String new_description = sc.nextLine().trim();
-		
 		System.out.printf("\n새로운 마감일 입력 (yyyy/mm/dd) > ");
-		String new_end_date = sc.nextLine().trim();
+		String new_due_date = sc.nextLine().trim();
 		
-		l.deleteItem(l.getList().get(number-1));
-		TodoItem t = new TodoItem(new_category, new_title, new_description, new_end_date);
-		l.addEditItem(number-1, t);
+		TodoItem t = new TodoItem(new_category, new_title, new_description, new_due_date);
+		t.setId(index);
+		if(l.updateItem(t)>0)
+			System.out.println("수정되었습니다.");
 	}
 
 	public static void listAll(TodoList l) {
-		int i = 1;
-		System.out.printf("[전체 목록, 총 %d개]", l.getList().size());
+		System.out.printf("[전체 목록, 총 %d개]\n", l.getCount());
 		for (TodoItem item : l.getList()) {
-			System.out.printf("\n%d. [%s] %s - %s - %s - %s",i, item.getCategry(),item.getTitle(), item.getDesc(), item.getEnd_date(), item.getCurrent_date());
-			i++;
+			System.out.println(item.toString());
 		}
-		System.out.println();
 	}
 	
+	public static void sortByName(TodoList l) {
+		System.out.printf("[전체 목록, 총 %d개]\n", l.getCount());
+		for (TodoItem item : l.getList()) {
+			System.out.println(item.toString());
+		}
+	}
+	
+	public static void sortByName(TodoList l, String query) {
+		System.out.printf("[전체 목록, 총 %d개]\n", l.getCount());
+		for (TodoItem item : l.getList(query)) {
+			System.out.println(item.toString());
+		}
+	}
+
 	public static void findList(TodoList l, String keyword) {
 		keyword = keyword.trim();
 		ArrayList<String> list = new ArrayList<String>();
@@ -107,7 +114,7 @@ public class TodoUtil {
 		
 		for(TodoItem item: l.getList()) {
 			if(item.toFindString().contains(keyword)){
-				list.add(i+". " + "[" + item.getCategry() + "] " + item.getTitle() + " - " + item.getDesc() + " - " + item.getEnd_date() + " - " + item.getCurrent_date());
+				list.add(i+". " + "[" + item.getCategory() + "] " + item.getTitle() + " - " + item.getDesc() + " - " + item.getDue_date() + " - " + item.getCurrent_date());
 			}
 			i++;
 		}
@@ -124,8 +131,8 @@ public class TodoUtil {
 		int i = 1;
 		
 		for(TodoItem item: l.getList()) {
-			if(item.getCategry().contains(cateName)){
-				list.add(i+". " + "[" + item.getCategry() + "] " + item.getTitle() + " - " + item.getDesc() + " - " + item.getEnd_date() + " - " + item.getCurrent_date());
+			if(item.getCategory().contains(cateName)){
+				list.add(i+". " + "[" + item.getCategory() + "] " + item.getTitle() + " - " + item.getDesc() + " - " + item.getDue_date() + " - " + item.getCurrent_date());
 			}
 			i++;
 		}
@@ -141,7 +148,7 @@ public class TodoUtil {
 		boolean first = true;
 		
 		for(TodoItem item: l.getList()) {
-			set.add(item.getCategry());
+			set.add(item.getCategory());
 		}
 		
 		for(String item: set) {
@@ -171,24 +178,28 @@ public class TodoUtil {
 		}
 	}
 	
-	public static void loadList(TodoList l, String filename) {
-		int i = 0;
+	public static void loadList(TodoList l) {
+		Statement stmt;
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(filename));
-			
-			String oneline;
-			while((oneline = br.readLine()) != null) {
-				i++;
-				String [] str = oneline.split("##");
-				l.addItem(new TodoItem(str[0], str[1], str[2], str[3], str[4]));
+			stmt = conn.createStatement();
+			String sql = "SELECT * FROM list";
+			ResultSet rs = stmt.executeQuery(sql);
+			while(rs.next()){
+				int id = rs.getInt("id");
+				String category = rs.getString("category");
+				String title = rs.getString("title");
+				String description = rs.getString("memo");
+				String due_date = rs.getString("due_date");
+				String current_date = rs.getString("current_date");
+				TodoItem t = new TodoItem(category, title, description, current_date, due_date);
+				t.setId(id);
+				t.setCurrent_date(current_date);
+				l.addItem(t);
 			}
-			
-			System.out.printf("\n총 %d개의 일정을 읽어왔습니다!\n", i);
-		}catch (FileNotFoundException e) {
-			
-		}catch (IOException e) {
-			
+		}catch(SQLException e) {
+			e.printStackTrace();
 		}
-		}
+	}
+		
 	}
 

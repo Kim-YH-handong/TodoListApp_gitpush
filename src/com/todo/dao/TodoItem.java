@@ -4,29 +4,39 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class TodoItem {
+	private int id;
 	private String category;
     private String title;
     private String desc;
     private String current_date;
-    private String end_date;
+    private String due_date;
 
 
-    public TodoItem(String category, String title, String desc, String date, String endDate) {
+    public TodoItem(String category, String title, String desc, String date, String duedate) {
     	this.category = category;
     	this.title = title;
     	this.desc = desc;
     	this.current_date = date;
-    	this.end_date = endDate;
+    	this.due_date = duedate;
     }
     
-    public TodoItem(String category, String title, String desc, String end_date){
+    public TodoItem(String category, String title, String desc, String due_date){
     	this.category = category;
         this.title=title;
         this.desc=desc;
         SimpleDateFormat f = new SimpleDateFormat("yyyy/MM/dd kk:mm:ss");
         this.current_date= f.format(new Date());
-        this.end_date = end_date;
+        this.due_date = due_date;
     }
+    
+    public int getId() {
+    	return id;
+    }
+    
+    public void setId(int id) {
+    	this.id = id;
+    }
+    
     
     public String getTitle() {
         return title;
@@ -52,15 +62,15 @@ public class TodoItem {
         this.current_date = current_date;
     }
     
-    public String getEnd_date() {
-        return end_date;
+    public String getDue_date() {
+        return due_date;
     }
 
-    public void setEnd_date(String end_date) {
-        this.end_date = end_date;
+    public void setDue_date(String due_date) {
+        this.due_date = due_date;
     }
     
-    public String getCategry() {
+    public String getCategory() {
         return category;
     }
 
@@ -68,13 +78,17 @@ public class TodoItem {
         this.category = category;
     }
     
+    public String toString() {
+    	String result = id + " " + "[" + category + "] " + title + " - " + desc + " - " + current_date + " - " + due_date;
+    	return result;
+    }
     
     public String toSaveString() {
-    	return category + "##" + title + "##" + desc + "##" + current_date + "##" + end_date + "\n";
+    	return category + "##" + title + "##" + desc + "##" + current_date + "##" + due_date + "\n";
     }
     
     public String toFindString() {
-    	return category+title+desc+current_date+end_date;
+    	return category+title+desc+current_date+due_date;
     }
 }
 
